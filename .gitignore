@@ -7,3 +7,7 @@ data/split_data/train/train.csv
 *.pkl
 data/embedding/train/programs_ast.csv
 data/embedding/train/node_w2v_128
+data/split_data/dev/blocks.csv
+data/split_data/dev/dev.csv
+data/split_data/test/blocks.csv
+data/split_data/train/blocks.csv

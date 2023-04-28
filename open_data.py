@@ -2,11 +2,16 @@ import os
 import pickle
 import pandas as pd
 
-file3 = './data/ast.pkl'
-file4 = './data/programs.csv'
-file5 = './data/c/programs.pkl'
-file6 = './data/java/bcb_pair_ids.pkl'
-file7 = './data/java/bcb_funcs_all.tsv'
+file_paths = ['./data/ast.pkl',
+                './data/programs.pkl',
+                './data/split_data/dev/blocks.pkl',
+                './data/split_data/test/blocks.pkl',
+                './data/split_data/train/blocks.pkl',
+                './data/split_data/dev/dev.pkl',
+                './data/split_data/test/test.pkl',
+                './data/split_data/train/train.pkl'
+            ]
+
 
 def load_pickle_to_dataframe(file_path):
     with open(file_path, 'rb') as infile:
@@ -25,9 +30,11 @@ def tsv_to_csv(path):
     print(f'Successfully converted {path} to {csv_file}')
 
 
-#df = load_pickle_to_dataframe(file6)
-#print(df)
-
-#pkl_to_csv(file5)
-#pkl_to_csv(file6)
-#tsv_to_csv(file7)
+for path in file_paths:
+    if path.endswith('.pkl'):
+        pkl_to_csv(path)
+        print('Saved csv')
+    elif path.endswith('.tsv'):
+        tsv_to_csv(path)
+    else:
+        print(f'Unsupported file format for {path}')
