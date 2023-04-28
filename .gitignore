@@ -1,0 +1,9 @@
+
+*.pyc
+data/ast.csv
+data/split_data/test/test.csv
+data/split_data/train/dev.csv
+data/split_data/train/train.csv
+*.pkl
+data/embedding/train/programs_ast.csv
+data/embedding/train/node_w2v_128

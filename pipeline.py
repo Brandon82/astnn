@@ -4,8 +4,6 @@ from tqdm.auto import tqdm
 tqdm.pandas()
 
 data_path = './data/'
-programs_data_path = './data/pre/programs.csv'
-parsed_data_path = './data/pre/ast.csv'
 
 split_train_path = './data/split_data/train/'
 split_test_path = './data/split_data/test/'
@@ -57,15 +55,15 @@ class Pipeline:
         """
         input_file_path = os.path.join(data_path, input_file)
         if output_file is None:
-            source = pd.read_csv(input_file_path)
+            source = pd.read_pickle(input_file_path)
         else:
             from pycparser import c_parser
             parser = c_parser.CParser()
-            source = pd.read_csv(input_file_path)
+            source = pd.read_pickle(input_file_path)
             source.columns = ['id', 'code', 'label']
             source['code'] = source['code'].progress_apply(parser.parse)
 
-            source.to_csv(os.path.join(data_path, output_file))
+            source.to_pickle(os.path.join(data_path, output_file))
         self.sources = source
         return source
 
@@ -87,23 +85,22 @@ class Pipeline:
         
         check_or_create('./data/split_data')
         check_or_create(split_train_path)
-        self.train_file_path = split_train_path+'train.csv'
-        train.to_csv(self.train_file_path)
+        self.train_file_path = split_train_path+'train.pkl'
+        train.to_pickle(self.train_file_path)
 
         check_or_create(split_dev_path)
-        self.dev_file_path = split_train_path+'dev.csv'
-        dev.to_csv(self.dev_file_path)
+        self.dev_file_path = split_dev_path+'dev.pkl'
+        dev.to_pickle(self.dev_file_path)
 
         check_or_create(split_test_path)
-        self.test_file_path = split_test_path+'test.csv'
-        test.to_csv(self.test_file_path)
+        self.test_file_path = split_test_path+'test.pkl'
+        test.to_pickle(self.test_file_path)
 
     # construct dictionary and train word embedding
-    def dictionary_and_embedding(self, input_file, size):
+    def dictionary_and_embedding(self, size):
         self.size = size
-        if not input_file:
-            input_file = self.train_file_path
-        trees = pd.read_csv(input_file)
+
+        trees = pd.read_pickle(self.train_file_path)
 
         def check_or_create(path):
             if not os.path.exists(path):
@@ -118,6 +115,7 @@ class Pipeline:
             sequence = []
             get_sequences(ast, sequence)
             return sequence
+            
         corpus = trees['code'].apply(trans_to_sequences)
         str_corpus = [' '.join(c) for c in corpus]
         trees['code'] = pd.Series(str_corpus)
@@ -128,17 +126,17 @@ class Pipeline:
         w2v.save(embedding_save_path + '/node_w2v_' + str(size))
 
     # generate block sequences with index representations
-    def generate_block_seqs(self, data_path, part):
+    def generate_block_seqs(self, part):
         from prepare_data import get_blocks as func
         from gensim.models.word2vec import Word2Vec
 
-        word2vec = Word2Vec.load('./data/split_data/train/embedding/node_w2v_' + str(self.size)).wv
-        vocab = word2vec.vocab
-        max_token = word2vec.syn0.shape[0]
+        word2vec = Word2Vec.load('./data/embedding/train/node_w2v_128').wv
+        vocab = word2vec.key_to_index
+        max_token = word2vec.vectors.shape[0]
 
         def tree_to_index(node):
             token = node.token
-            result = [vocab[token].index if token in vocab else max_token]
+            result = [vocab[token] if token in vocab else max_token]
             children = node.children
             for child in children:
                 result.append(tree_to_index(child))
@@ -152,27 +150,27 @@ class Pipeline:
                 btree = tree_to_index(b)
                 tree.append(btree)
             return tree
-        trees = pd.read_csv(data_path)
+        trees = pd.read_pickle('./data/split_data/' + part + '/' + part + '.pkl')
         trees['code'] = trees['code'].apply(trans2seq)
-        trees.to_csv('./data/split_data/' + part + '/blocks.csv')
+        trees.to_pickle('./data/split_data/' + part + '/blocks.pkl')
        
 
     # run for processing data to train
     def run(self):
-        print('parse source code...')
-        if os.path.exists(os.path.join(data_path, 'ast.csv')):
-            self.get_parsed_source(input_file='ast.csv')
-        else:
-            self.get_parsed_source(input_file='programs.csv',
-                                   output_file='ast.csv')
-        print('split data...')
-        self.split_data()
-        print('train word embedding...')
-        self.dictionary_and_embedding(None, 128)
+       # print('parse source code...')
+       # if os.path.exists(os.path.join(data_path, 'ast.pkl')):
+            #self.get_parsed_source(input_file='ast.pkl')
+       # else:
+            #self.get_parsed_source(input_file='programs.pkl',
+                                 #  output_file='ast.pkl')
+        #print('split data...')
+        #self.split_data()
+        #print('train word embedding...')
+        #self.dictionary_and_embedding(128)
         print('generate block sequences...')
-        self.generate_block_seqs(self.train_file_path, 'train')
-        self.generate_block_seqs(self.dev_file_path, 'dev')
-        self.generate_block_seqs(self.test_file_path, 'test')
+        self.generate_block_seqs(part='train')
+        self.generate_block_seqs(part='dev')
+        self.generate_block_seqs(part='test')
 
 
 ppl = Pipeline('3:1:1', language='java')
