@@ -1,7 +1,11 @@
 import pandas as pd
 import os
+import sys
+import warnings
+import click
 from tqdm.auto import tqdm
 tqdm.pandas()
+warnings.filterwarnings('ignore')
 
 data_path = './data/'
 
@@ -17,13 +21,6 @@ blocks_dev_save_path = './data/split_data/dev/'
 
 
 class Pipeline:
-    """Pipeline class
-
-    Args:
-        ratio ([type]): [description]
-        root (str): Path to the folder containing the data
-    """
-
     def __init__(self, ratio, language):
         self.language = language.lower()
         self.ratio = ratio
@@ -57,13 +54,32 @@ class Pipeline:
         if output_file is None:
             source = pd.read_pickle(input_file_path)
         else:
-            from pycparser import c_parser
-            parser = c_parser.CParser()
-            source = pd.read_pickle(input_file_path)
-            source.columns = ['id', 'code', 'label']
-            source['code'] = source['code'].progress_apply(parser.parse)
+            if self.language == 'c':
+                from pycparser import c_parser
+                parser = c_parser.CParser()
+                source = pd.read_pickle(input_file_path)
+                source.columns = ['id', 'code', 'label']
+                source['code'] = source['code'].progress_apply(parser.parse)
+                source.to_pickle(os.path.join(data_path, output_file))
+            else:
+                import javalang
 
-            source.to_pickle(os.path.join(data_path, output_file))
+                def parse_program(func):
+                    try:
+                        try:
+                            tokens = javalang.tokenizer.tokenize(func)
+                            parser = javalang.parser.Parser(tokens)
+                            tree = parser.parse_member_declaration()
+                            return tree
+                        except StopIteration:
+                            return None
+                    except javalang.parser.JavaSyntaxError:
+                        return None
+                source_ = pd.read_pickle(input_file_path)
+                source = pd.DataFrame(source_, columns=['id', 'code', 'label'])
+                source['code'] = source['code'].progress_apply(parse_program)
+                source.dropna(subset=['code'], inplace=True)
+                source.to_pickle(os.path.join(data_path, output_file))
         self.sources = source
         return source
 
@@ -109,11 +125,12 @@ class Pipeline:
         check_or_create('./data/embedding/')   
         check_or_create('./data/embedding/train/')   
 
-        from prepare_data import get_sequences
+        from utils import get_sequence
+
 
         def trans_to_sequences(ast):
             sequence = []
-            get_sequences(ast, sequence)
+            get_sequence(ast, sequence)
             return sequence
             
         corpus = trees['code'].apply(trans_to_sequences)
@@ -127,7 +144,7 @@ class Pipeline:
 
     # generate block sequences with index representations
     def generate_block_seqs(self, part):
-        from prepare_data import get_blocks as func
+        from utils import get_blocks_v1 as get_blocks_j
         from gensim.models.word2vec import Word2Vec
 
         word2vec = Word2Vec.load('./data/embedding/train/node_w2v_128').wv
@@ -144,7 +161,7 @@ class Pipeline:
 
         def trans2seq(r):
             blocks = []
-            func(r, blocks)
+            get_blocks_j(r, blocks)
             tree = []
             for b in blocks:
                 btree = tree_to_index(b)
@@ -157,16 +174,16 @@ class Pipeline:
 
     # run for processing data to train
     def run(self):
-       # print('parse source code...')
-       # if os.path.exists(os.path.join(data_path, 'ast.pkl')):
-            #self.get_parsed_source(input_file='ast.pkl')
-       # else:
-            #self.get_parsed_source(input_file='programs.pkl',
-                                 #  output_file='ast.pkl')
-        #print('split data...')
-        #self.split_data()
-        #print('train word embedding...')
-        #self.dictionary_and_embedding(128)
+        print('parse source code...')
+        if os.path.exists(os.path.join(data_path, 'ast.pkl')):
+            self.get_parsed_source(input_file='ast.pkl')
+        else:
+            self.get_parsed_source(input_file='myprograms.pkl', output_file='ast.pkl')
+
+        print('split data...')
+        self.split_data()
+        print('train word embedding...')
+        self.dictionary_and_embedding(128)
         print('generate block sequences...')
         self.generate_block_seqs(part='train')
         self.generate_block_seqs(part='dev')

@@ -12,7 +12,7 @@ import numpy as np
 def get_sequences(node, sequence):
     current = SingleNode(node)
     sequence.append(current.get_token())
-    for _, child in node.children():
+    for _, child in node.children:
         get_sequences(child, sequence)
     if current.get_token().lower() == 'compound':
         sequence.append('End')

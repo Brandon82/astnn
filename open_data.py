@@ -29,12 +29,15 @@ def tsv_to_csv(path):
     df.to_csv(csv_file, index=False)
     print(f'Successfully converted {path} to {csv_file}')
 
+def convert_all():
+    for path in file_paths:
+        if path.endswith('.pkl'):
+            pkl_to_csv(path)
+            print('Saved csv')
+        elif path.endswith('.tsv'):
+            tsv_to_csv(path)
+        else:
+            print(f'Unsupported file format for {path}')
 
-for path in file_paths:
-    if path.endswith('.pkl'):
-        pkl_to_csv(path)
-        print('Saved csv')
-    elif path.endswith('.tsv'):
-        tsv_to_csv(path)
-    else:
-        print(f'Unsupported file format for {path}')
+
+# convert_all()
