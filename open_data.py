@@ -2,7 +2,8 @@ import os
 import pickle
 import pandas as pd
 
-file4 = './data/c/oj_clone_ids.pkl'
+file3 = './data/ast.pkl'
+file4 = './data/programs.pkl'
 file5 = './data/c/programs.pkl'
 file6 = './data/java/bcb_pair_ids.pkl'
 file7 = './data/java/bcb_funcs_all.tsv'
@@ -24,10 +25,10 @@ def tsv_to_csv(path):
     print(f'Successfully converted {path} to {csv_file}')
 
 
-df = load_pickle_to_dataframe(file6)
-print(df)
+#df = load_pickle_to_dataframe(file6)
+#print(df)
 
-pkl_to_csv(file4)
-pkl_to_csv(file5)
-pkl_to_csv(file6)
-tsv_to_csv(file7)
+pkl_to_csv(file3)
+#pkl_to_csv(file5)
+#pkl_to_csv(file6)
+#tsv_to_csv(file7)
