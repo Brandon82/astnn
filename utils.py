@@ -3,6 +3,7 @@ import javalang
 from javalang.ast import Node
 from tree import ASTNode, BlockNode
 import sys
+import os
 sys.setrecursionlimit(10000)
 
 def get_token(node):
@@ -76,5 +77,9 @@ def get_blocks_v1(node, block_seq):
     else:
         for child in children:
             get_blocks_v1(child, block_seq)
+
+def check_or_create(path):
+    if not os.path.exists(path):
+        os.mkdir(path)
 
 

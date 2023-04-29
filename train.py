@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 import os
 import sys
 import matplotlib.pyplot as plt
+from utils import check_or_create
 
 def get_batch(dataset, idx, bs):
     tmp = dataset.iloc[idx: idx+bs]
@@ -26,6 +27,7 @@ if __name__ == '__main__':
     train_data = pd.read_pickle('./data/split_data/train/blocks.pkl')
     val_data = pd.read_pickle('./data/split_data/dev/blocks.pkl')
     test_data = pd.read_pickle('./data/split_data/test/blocks.pkl')
+    MODEL_SAVE_PATH = './data/saved_model/'
 
     word2vec = Word2Vec.load('data/embedding/train/node_w2v_128').wv
     embeddings = np.zeros((word2vec.vectors.shape[0] + 1, word2vec.vectors.shape[1]), dtype="float32")
@@ -252,6 +254,9 @@ if __name__ == '__main__':
         tmp.insert(0, 'Stat', ['True Positive', 'True Negative', 'False Positive', 'False Negative'], True)
         tmp.to_excel(writer, sheet_name = str(i), index=None)
     writer.close()
-        
+    
+    check_or_create(MODEL_SAVE_PATH)
     df.to_csv(path_or_buf=data_out, index=None)
+    torch.save(model.state_dict(), MODEL_SAVE_PATH + 'model.pth')
+
     print('Done.')
