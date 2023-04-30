@@ -14,3 +14,5 @@ data/split_data/train/blocks.csv
 Results/Final-10/Final-10-stats.xlsx
 Results/Final-10/Final-10.csv
 /__pycache__
+/Results
+/results
