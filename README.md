@@ -22,7 +22,7 @@ Here's a list of changes compared to the original repository:
 
 - Implemented a Java dataset from Mutantbench
   - https://b2share.eudat.eu/records/fd8e674385214fe9a327941525c31f53
-  - Created a parser that integrates each mutation into its original program and returns the mutated method/file.
+  - Created a parser that inserts each mutation into its original program and returns the mutated method/file.
 - Upgraded to Python 3.10
 - Updated to more recent library versions
 - Added `open_data.py` to convert `.pkl` files to `.csv` for easier viewing
