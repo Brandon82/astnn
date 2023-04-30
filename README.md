@@ -1,7 +1,7 @@
 # ASTNN--A Novel Neural Source Code Representation based on Abstract Syntax Tree
 This repository includes the code and experimental data in our paper entitled "A Novel Neural Source Code Representation based on Abstract Syntax Tree" published in ICSE'2019. It can be used to encode code fragments into supervised vectors for various source code related tasks. We have applied our neural source code representation to two common tasks: source code classification and code clone detection. It is also expected to be helpful in more tasks.
-- Please note that ./parser is not necessary and was used to some additional preprocessing of our dataset before inputting it into the pipeline
-	- Our original dataset consists of only unified difference strings, so we create a unified-diff parser to insert the mutations into their original programs
+- Please note that ./parser is not necessary and was used to do additional preprocessing on our dataset before inputting it into the pipeline
+	- Our original dataset consisted of only unified difference strings, so we create a unified-diff parser to insert the mutations into their original programs
 	
 ### Requirements
 + python 3.6<br>
