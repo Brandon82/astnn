@@ -36,8 +36,8 @@ if __name__ == '__main__':
     HIDDEN_DIM = 100
     ENCODE_DIM = 128
     LABELS = 2
-    EPOCHS = 10
-    BATCH_SIZE = 16
+    EPOCHS = 16
+    BATCH_SIZE = 4
     USE_GPU = False
     MAX_TOKENS = word2vec.vectors.shape[0]
     EMBEDDING_DIM = word2vec.vectors.shape[1]
@@ -257,6 +257,6 @@ if __name__ == '__main__':
     
     check_or_create(MODEL_SAVE_PATH)
     df.to_csv(path_or_buf=data_out, index=None)
-    torch.save(model.state_dict(), MODEL_SAVE_PATH + 'model.pth')
+    torch.save(model.state_dict(), MODEL_SAVE_PATH + 'model.pt')
 
     print('Done.')
