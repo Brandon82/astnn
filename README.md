@@ -1,19 +1,22 @@
-# ASTNN--A Novel Neural Source Code Representation based on Abstract Syntax Tree
-This repository includes the code and experimental data in our paper entitled "A Novel Neural Source Code Representation based on Abstract Syntax Tree" published in ICSE'2019. It can be used to encode code fragments into supervised vectors for various source code related tasks. We have applied our neural source code representation to two common tasks: source code classification and code clone detection. It is also expected to be helpful in more tasks.
-- Please note that ./parser is not necessary and was used to do additional preprocessing on our dataset before inputting it into the pipeline
-	- Our original dataset consisted of only unified difference strings, so we create a unified-diff parser to insert the mutations into their original programs
+# ASTNN - An Equivalent Mutant Identifier based on Abstract Syntax Tree
+An Abstract Syntax Tree Neural Network which aims to identify the equivalent mutants in a dataset of mutants.<br>
+Please note that the /parser folder is not necessary and was used to do additional preprocessing on our dataset before inputting it into the pipeline
+- Our original dataset consisted of only unified difference strings, so we create a unified-diff parser to insert the mutations into their original programs
 	
 ### Requirements
-+ python 3.6<br>
-+ pandas 0.20.3<br>
-+ gensim 3.5.0<br>
-+ scikit-learn 0.19.1<br>
-+ pytorch 1.0.0<br> (The version used in our paper is 0.3.1 and source code can be cloned by specifying the v1.0.0 tag if needed)
-+ pycparser 2.18<br>
-+ javalang 0.11.0<br>
-+ RAM 16GB or more
-+ GPU with CUDA support is also needed
-+ BATCH_SIZE should be configured based on the GPU memory size
+```bash
+  python 3.10
+  pandas 2.0.0
+  gensim 4.3.1
+  scikit-learn 1.2.2
+  torch 2.0.0
+  pycparser 2.21
+  javalang 0.13
+```
+
+Please note that original ASTNN implementation from which this was forked used python 3.6 and older libraries.<br>
+I have updated the project to 3.10 and to use more current library versions.
+
 
 ### How to install
 Install all the dependent packages via pip:
@@ -40,14 +43,3 @@ Please refer to the `pkl` files in the corresponding directories of the two task
 For example, to realize clone detection, you need to replace the two files in /clone/data/java, bcb_pair_ids.pkl and bcb_funcs_all.tsv.
 Specifically, the data format of bcb_pair_ids.pkl  is "id1, id2, label", where id1/2 correspond to the id in  bcb_funcs_all.tsv and label indicates whether they are clone or which clone type (i.e., 0 and 1-5 , 0 and 1 in a non-type case).
 The data format of bcb_funcs_all.tsv is "id, function".
- 
-### Citation
-  If you find this code useful in your research, please, consider citing our paper:
-  > @inproceedings{zhang2019novel,
-  title={A novel neural source code representation based on abstract syntax tree},
-  author={Zhang, Jian and Wang, Xu and Zhang, Hongyu and Sun, Hailong and Wang, Kaixuan and Liu, Xudong},
-  booktitle={Proceedings of the 41st International Conference on Software Engineering},
-  pages={783--794},
-  year={2019},
-  organization={IEEE Press}
-}
