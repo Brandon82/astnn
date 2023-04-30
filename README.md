@@ -1,4 +1,4 @@
-# ASTNN - An Equivalent Mutant Identifier based on Abstract Syntax Tree
+# ASTNN - An Equivalent Mutant Identifier
 An Abstract Syntax Tree Neural Network which aims to identify the equivalent mutants in a dataset of mutants.<br>
 Please note that the /parser folder is not necessary and was used to do additional preprocessing on our dataset before inputting it into the pipeline
 - Our original dataset consisted of only unified difference strings, so we create a unified-diff parser to insert the mutations into their original programs
