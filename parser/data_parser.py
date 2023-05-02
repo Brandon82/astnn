@@ -72,12 +72,12 @@ class DatasetParser:
                 equivalence = element[equivalence_key][0].get('@value')
                 mutant.equivalence = equivalence
                 if mutant.equivalence == 'true':
-                    mutant.label = 1
+                    mutant.label = 2
                     self.ps.num_equiv += 1
                     if mutant.type == 'java':
                         self.ps.num_java_equiv +=1
                 elif mutant.equivalence == 'false':
-                    mutant.label = 0
+                    mutant.label = 1
                     self.ps.num_non_equiv += 1
                     if mutant.type == 'java':
                         self.ps.num_java_nonequiv +=1

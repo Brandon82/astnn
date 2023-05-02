@@ -13,7 +13,7 @@ dataset_file = './dataset.ttl'
 mutant_save_path = './mutants/'
 pkl_save_path = './parser_results/'
 
-save_mutants_to_file = True
-save_only_methods = True
+save_mutants_to_file = False
+save_only_methods = True  # False = Saves entire program/class
 
 num_mutants_to_parse = 0    # 0 = parse all mutants
