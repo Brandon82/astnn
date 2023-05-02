@@ -3,9 +3,7 @@ import json
 from config import *
 from data_classes import Mutant, ParserStatistic
 from diff_parser import UnifiedDiffParser
-from utils import list_to_csv, list_to_pkl, split_data
-import csv
-import splitfolders
+from utils import list_to_csv, list_to_pkl
 
 class DatasetParser:
     def __init__(self, dataset_file):
@@ -35,9 +33,9 @@ class DatasetParser:
             
             # Now create the mutant data object
             mutant = Mutant()
-            mutant.id_num = i
+            mutant.id_num = i+1
 
-            # Cleaning the dataset:
+            # Cleaning the dataset by (renaming the keys)
             if id_val := element.get('@id'):
                 id_val_cleaned = id_val.replace("mb:mutant#", "")
                 mutant.id_str = id_val_cleaned
@@ -74,12 +72,12 @@ class DatasetParser:
                 equivalence = element[equivalence_key][0].get('@value')
                 mutant.equivalence = equivalence
                 if mutant.equivalence == 'true':
-                    mutant.label = 2
+                    mutant.label = 1
                     self.ps.num_equiv += 1
                     if mutant.type == 'java':
                         self.ps.num_java_equiv +=1
                 elif mutant.equivalence == 'false':
-                    mutant.label = 1
+                    mutant.label = 0
                     self.ps.num_non_equiv += 1
                     if mutant.type == 'java':
                         self.ps.num_java_nonequiv +=1
@@ -89,23 +87,21 @@ class DatasetParser:
             mutant.calculate_type()
             self.ps.num_parsed += 1
 
-            # Now that information about the mutant has been stored,
-            # the data can be further processed and filtered:
+            # After data about the mutant has been stored, the data can be further processed and filtered:
 
             if mutant.type == "java":
                 self.ps.num_java_mutants += 1
                 dp = UnifiedDiffParser(mutant.program, mutant.difference)
                 full_code = dp.parse_file(save_to_file=save_mutants_to_file, extract_methods=save_only_methods)
-                print('parsed ' + mutant.program)
+                print('parsed ' + mutant.program + ' ' + str(mutant.id_num))
                 if None not in [mutant.id_str, mutant.type, mutant.equivalence] and full_code is not None and isinstance(mutant.operator, str):
                     self.extracted_data.append({'id': mutant.id_num, 'code': full_code[0], 'operator': mutant.operator, 'label': mutant.label, 'method' : ''})
             elif mutant.type == "c":
                 self.ps.num_c_mutants += 1
 
-        # After the entire dataset is iterated and processed, save to c2v file, save split dataset, and return the parser stats
-        list_to_csv(self.extracted_data)
-        list_to_pkl(self.extracted_data)
-        split_data()
+        # Save processed dataset to c2v/pkl file, and return the parser stats
+        list_to_csv(self.extracted_data, pkl_save_path)
+        list_to_pkl(self.extracted_data, pkl_save_path)
         return self.ps
 
 

@@ -13,7 +13,7 @@ An **Abstract Syntax Tree Neural Network** aiming to identify equivalent mutants
   pycparser 2.21
   javalang 0.13
 ```
-> Please note that the original ASTNN implementation, from which this was forked, utilized Python 3.6 and older library versions. We have updated the project to Python 3.10 and more recent library versions.
+> Note that the original ASTNN implementation, from which this was forked, utilized Python 3.6 and older library versions. We have updated the project to Python 3.10 and more recent library versions.
 
 ## Added Features
 Here's a list of changes compared to the original repository:
