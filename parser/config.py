@@ -8,11 +8,11 @@ keys_to_ignore = ("http://schema.org/name", "http://schema.org/person", "http://
 
 
 
-original_program_path = '../dataset/original_programs/'
+original_program_path = './original_programs/'
 dataset_path = '../dataset/'
-dataset_file = '../dataset/dataset.ttl'
-mutant_save_path = '../dataset/mutated_data/'
-mutant_save_split_path = '../dataset/mutated_data_split/'
+dataset_file = '.../dataset.ttl'
+mutant_save_path = './dataset/mutated_data/'
+mutant_save_split_path = './dataset/mutated_data_split/'
 save_mutants_to_file = True
 save_only_methods = True
 num_mutants_to_parse = 0    # 0 = parse all mutants
