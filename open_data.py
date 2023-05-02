@@ -3,7 +3,6 @@ import pickle
 import pandas as pd
 
 file_paths = ['./data/ast.pkl',
-                './data/programs.pkl',
                 './data/split_data/dev/blocks.pkl',
                 './data/split_data/test/blocks.pkl',
                 './data/split_data/train/blocks.pkl',
@@ -40,4 +39,4 @@ def convert_all():
             print(f'Unsupported file format for {path}')
 
 
-# convert_all()
+convert_all()
