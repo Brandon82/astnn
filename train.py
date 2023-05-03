@@ -11,6 +11,7 @@ import os
 import sys
 import matplotlib.pyplot as plt
 from utils import check_or_create
+from config import *
 
 def get_batch(dataset, idx, bs):
     tmp = dataset.iloc[idx: idx+bs]
@@ -27,18 +28,11 @@ if __name__ == '__main__':
     train_data = pd.read_pickle('./data/split_data/train/blocks.pkl')
     val_data = pd.read_pickle('./data/split_data/dev/blocks.pkl')
     test_data = pd.read_pickle('./data/split_data/test/blocks.pkl')
-    MODEL_SAVE_PATH = './data/saved_model/'
 
-    word2vec = Word2Vec.load('data/embedding/train/node_w2v_128').wv
+    word2vec = Word2Vec.load(embedding_save_path + 'node_w2v_128').wv
     embeddings = np.zeros((word2vec.vectors.shape[0] + 1, word2vec.vectors.shape[1]), dtype="float32")
     embeddings[:word2vec.vectors.shape[0]] = word2vec.vectors
 
-    HIDDEN_DIM = 100
-    ENCODE_DIM = 128
-    LABELS = 2
-    EPOCHS = 16
-    BATCH_SIZE = 4
-    USE_GPU = False
     MAX_TOKENS = word2vec.vectors.shape[0]
     EMBEDDING_DIM = word2vec.vectors.shape[1]
     
@@ -119,6 +113,7 @@ if __name__ == '__main__':
             total += len(train_labels)
             total_loss += loss.item()*len(train_inputs)
 
+            # for p, t, s in zip(predicted, train_labels):
             for p, t in zip(predicted, train_labels):
                 if p == t == 1:
                     tpos[0] += 1
@@ -157,6 +152,7 @@ if __name__ == '__main__':
             torch.cuda.empty_cache()
             batch = get_batch(val_data, i, BATCH_SIZE)
             i += BATCH_SIZE
+            # val_inputs, val_labels, val_sets = batch
             val_inputs, val_labels = batch
             if USE_GPU:
                 val_inputs, val_labels = val_inputs, val_labels.cuda()
@@ -173,6 +169,7 @@ if __name__ == '__main__':
             total += len(val_labels)
             total_loss += loss.item()*len(val_inputs)
             
+            # for p, t, s in zip(predicted, val_labels, val_sets):
             for p, t in zip(predicted, val_labels):
                 if p == t == 1:
                     tpos[1] += 1
@@ -229,6 +226,7 @@ if __name__ == '__main__':
         torch.cuda.empty_cache()
         batch = get_batch(test_data, i, BATCH_SIZE)
         i += BATCH_SIZE
+        # test_inputs, test_labels, test_sets = batch
         test_inputs, test_labels = batch
         if USE_GPU:
             test_inputs, test_labels = test_inputs, test_labels.cuda()
@@ -253,8 +251,9 @@ if __name__ == '__main__':
         tmp = pd.DataFrame(stats_[i], columns = ['Training', 'Validation'], index=None)
         tmp.insert(0, 'Stat', ['True Positive', 'True Negative', 'False Positive', 'False Negative'], True)
         tmp.to_excel(writer, sheet_name = str(i), index=None)
+    # writer.save()
     writer.close()
-    
+
     check_or_create(MODEL_SAVE_PATH)
     df.to_csv(path_or_buf=data_out, index=None)
     torch.save(model.state_dict(), MODEL_SAVE_PATH + 'model.pt')
