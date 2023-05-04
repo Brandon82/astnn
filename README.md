@@ -27,3 +27,4 @@ Here's a list of changes compared to the original repository:
 - Saved the trained model to allow for inference
 - Added `test_from_trained.py` to get predictions on additional data from the trained model
 - General refactoring of `pipeline.py` and `train.py` to improve code quality
+- Provided a new approach to equivalent mutant identification: using Code2Vec's code vectors with a feedforward neural network found in `model_c2v.py`
