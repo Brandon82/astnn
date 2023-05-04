@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 import os
 import sys
 import matplotlib.pyplot as plt
+from sklearn.model_selection import KFold
 from utils import check_or_create
 from config import *
 
@@ -19,7 +20,6 @@ def get_batch(dataset, idx, bs):
     for _, item in tmp.iterrows():
         data.append(item[1])
         labels.append(item[2]-1)
-#        p_set.append(item[5])
     return data, torch.LongTensor(labels)
 
 if __name__ == '__main__':
