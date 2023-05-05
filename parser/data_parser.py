@@ -3,14 +3,13 @@ import json
 from config import *
 from data_classes import Mutant, ParserStatistic
 from diff_parser import UnifiedDiffParser
-from utils import list_to_csv, list_to_pkl
+from utils import *
 
 class DatasetParser:
     def __init__(self, dataset_file):
         self.dataset_file = dataset_file
         self.json_dict = None
         self.extracted_data = []
-        self.ps = ParserStatistic()
 
     def load_dataset(self):
         g = rdflib.Graph()
@@ -21,88 +20,68 @@ class DatasetParser:
     def parse_mutants(self, num_to_parse):
         if self.json_dict is None:
             raise ValueError("Dataset not loaded. Call load_dataset() first")
+        
+        ps = ParserStatistic()
 
         for i, element in enumerate(self.json_dict):
-            # Elements to ignore/filter based on their dict key
+            # Elements to ignore/filter based on their dictionary key
             if any(key in element for key in keys_to_ignore) or difference_key not in element or operator_key not in element:
-                self.ps.num_ignored += 1
+                ps.num_ignored += 1
                 continue
             # Stop if num_parsed has been reached
-            if self.ps.num_parsed == num_to_parse and num_to_parse != 0:
+            if ps.num_parsed == num_to_parse and num_to_parse != 0:
                 break
             
-            # Now create the mutant data object
-            mutant = Mutant()
-            mutant.id_num = i+1
-
-            # Cleaning the dataset by (renaming the keys)
             if id_val := element.get('@id'):
-                id_val_cleaned = id_val.replace("mb:mutant#", "")
-                mutant.id_str = id_val_cleaned
+                id_str = id_val.replace("mb:mutant#", "")
             else:
                 raise ValueError("ID Key not found")
 
             if program_key in element:
                 program = element[program_key][0].get('@id')
-                program_cleaned = program.replace("mb:program#", "")
-                mutant.program = program_cleaned
+                program_name = program.replace("mb:program#", "")
+                extension = get_file_extension(program_name);
             else:
                 raise ValueError("Program key not found")
             
             if difference_key in element:
-                difference = element[difference_key][0].get('@value')
-                mutant.difference = difference
+                unified_diff = element[difference_key][0].get('@value')
             else:
                 raise ValueError("Difference key not found")
 
             if operator_key in element:
-                operators_list = element[operator_key]
-                if len(operators_list) == 1:
-                    mutant.operator = operators_list[0]['@id'].replace("mb:operator#", "").strip()
-                else:
-                    for operators in operators_list:
-                        operator_ids = operators['@id'].split(",")
-                        for operator_id in operator_ids:
-                            operator_cleaned = operator_id.replace("mb:operator#", "").strip()
-                            mutant.operator.append(operator_cleaned)
+                op_list_uncleaned = element[operator_key]
+                operator_list = []
+                for operators in op_list_uncleaned:
+                    operator_ids = operators['@id'].split(",")
+                    for operator_id in operator_ids:
+                        operator_cleaned = operator_id.replace("mb:operator#", "").strip()
+                        operator_list.append(operator_cleaned)
             else:
                 raise ValueError("Operator key not found")
 
             if equivalence_key in element:
-                equivalence = element[equivalence_key][0].get('@value')
-                mutant.equivalence = equivalence
-                if mutant.equivalence == 'true':
-                    mutant.label = 2
-                    self.ps.num_equiv += 1
-                    if mutant.type == 'java':
-                        self.ps.num_java_equiv +=1
-                elif mutant.equivalence == 'false':
-                    mutant.label = 1
-                    self.ps.num_non_equiv += 1
-                    if mutant.type == 'java':
-                        self.ps.num_java_nonequiv +=1
+                equiv = element[equivalence_key][0].get('@value')
             else:
                 raise ValueError("Equivalence key not found")
 
-            mutant.calculate_type()
-            self.ps.num_parsed += 1
+            mutant = Mutant(id_str, i+1, operator_list, program_name, extension, unified_diff, equiv)
+            ps.num_parsed += 1
 
-            # After data about the mutant has been stored, the data can be further processed and filtered:
-
-            if mutant.type == "java":
-                self.ps.num_java_mutants += 1
-                dp = UnifiedDiffParser(mutant.program, mutant.difference)
+            if mutant.file_extension == "java":
+                ps.num_java_mutants += 1
+                dp = UnifiedDiffParser(mutant.program_name, mutant.unified_diff)
                 full_code = dp.parse_file(save_to_file=save_mutants_to_file, extract_methods=save_only_methods)
-                print('parsed ' + mutant.program + ' ' + str(mutant.id_num))
-                if None not in [mutant.id_str, mutant.type, mutant.equivalence] and full_code is not None and isinstance(mutant.operator, str):
-                    self.extracted_data.append({'id': mutant.id_num, 'code': full_code[0], 'operator': mutant.operator, 'label': mutant.label, 'method' : ''})
-            elif mutant.type == "c":
-                self.ps.num_c_mutants += 1
+                print('parsed ' + mutant.program_name + ' ' + str(mutant.id_num))
+                if None not in [mutant.id_str, mutant.file_extension, mutant.equivalence] and full_code is not None:
+                    self.extracted_data.append({'id': mutant.id_num, 'code': full_code[0], 'operator': mutant.operator_list, 'label': mutant.equivalence})
+            elif mutant.file_extension == "c":
+                ps.num_c_mutants += 1
 
         # Save processed dataset to c2v/pkl file, and return the parser stats
         list_to_csv(self.extracted_data, pkl_save_path)
         list_to_pkl(self.extracted_data, pkl_save_path)
-        return self.ps
+        return ps
 
 
 if __name__ == "__main__":
